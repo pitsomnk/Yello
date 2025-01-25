@@ -1,39 +1,37 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { SessionProvider } from "@/context";
+import { Slot } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+// Import your global CSS file
+import "../global.css";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+/**
+ * Root Layout is the highest-level layout in the app, wrapping all other layouts and screens.
+ * It provides:
+ * 1. Global authentication context via SessionProvider
+ * 2. Gesture handling support for the entire app
+ * 3. Global styles and configurations
+ *
+ * This layout affects every screen in the app, including both authenticated
+ * and unauthenticated routes.
+ */
+export default function Root() {
+  // Set up the auth context and render our layout inside of it.
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SessionProvider>
+      {/* 
+        GestureHandlerRootView is required for:
+        - Drawer navigation gestures
+        - Swipe gestures
+        - Other gesture-based interactions
+        Must wrap the entire app to function properly
+      */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {/* 
+          Slot renders child routes dynamically
+          This includes both (app) and (auth) group routes
+        */}
+        <Slot />
+      </GestureHandlerRootView>
+    </SessionProvider>
   );
 }
