@@ -5,6 +5,20 @@ import { router } from "expo-router";
 import db from '../../../../lib/firebase-config';
 import { collection, doc, getDoc, setDoc, serverTimestamp, query, orderBy, limit, getDocs } from "firebase/firestore";
 
+// ============================================================================
+// Interface Definitions
+// ============================================================================
+interface Transaction {
+  id: string;
+  type: string;
+  weight: number;
+  totalAmount: number;
+  date: string;
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
 const TabsIndexScreen = () => {
   // ============================================================================
   // Hooks & State Management
@@ -13,13 +27,13 @@ const TabsIndexScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isTransactionsLoading, setTransactionsLoading] = useState(true);
 
   // ============================================================================
   // Data Fetching
   // ============================================================================
-  const createUserDocument = async (user) => {
+  const createUserDocument = async (user: any) => {
     try {
       await setDoc(doc(db, "users", user.uid), {
         balance: 0.0,
